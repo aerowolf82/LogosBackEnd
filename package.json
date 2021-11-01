@@ -1,0 +1,30 @@
+{
+  "name": "LogosBackEnd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aerowolf82/LogosBackEnd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-async-handler": "^1.2.0",
+    "knex": "^0.95.12",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.6.6",
+    "nodemon": "^2.0.14",
+    "pg": "^8.7.1"
+  },
+  "bugs": {
+    "url": "https://github.com/aerowolf82/LogosBackEnd/issues"
+  },
+  "homepage": "https://github.com/aerowolf82/LogosBackEnd#readme"
+}
