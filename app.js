@@ -2,11 +2,11 @@
 const express = require('express')
 const morgan = require('morgan');
 const app = express();
-const knex = require('knex')(require('./knexfile.js')[process.env.NODE_ENV || 'development']);
+const knex = require('knex')(require('./knexfile.js')['development']);
 const axios = require('axios');
-const asyncHandler = require('express-async-handler')
+// const asyncHandler = require('express-async-handler')
 
-const port = process.env.port || 3001;
+//const port = process.env.port || 3001;
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
@@ -14,8 +14,8 @@ app.use(morgan('dev'));
 
 /*
 endpoints
-/spacecraft
-/spacecraft/:name
+/spacecraft - select * from spacecraft; (space devs api limits to 10 ?limit=10&offset=0 increase offset by ten to pull next batch)
+/spacecraft/:name - select * from spacecraft where family like '%name_to_search%';
 /pad
 /pad/:name
 */
@@ -23,20 +23,40 @@ endpoints
 
 
 
-// //All Pokemon in the DB's name
-// app.get('/api/pokemon', function (req, res) {
-//   knex
-//     .select('Name')
-//     .from('pokemon')
-//     .then(data => res.status(200).json(data))
-//     .catch(err =>
-//       res.status(404).json({
-//         message:
-//           'The data you are looking for could not be found. Please try again'
-//       })
-//     );
-// });
+//All Spacecraft in the DB
+app.get('/spacecraft', function (req, res) {
+  knex
+    .select('name', 'family') //need to refactor to * later in testing
+    .from('spacecraft')
+    .then(data => res.status(200).json(data))
+    .catch(err =>
+      res.status(404).json({
+        message:
+          'The data you are looking for could not be found. Please try again'
+      })
+    );
+});
 
+app.get('/spacecraft/:name', (req, res) => {
+  let family = req.params.name;
+});
+
+// app.get('/movies/:moviesId', (req, res) => {
+//   let id = parseInt(req.params.moviesId, 10);
+//   console.log(id);
+//   let movie;
+//   if (Number.isNaN(id)) {
+//     res.status(400).send("Invalid ID supplied").end()
+//   }
+//   if (req.params.moviesId) {
+//     movie= movies.find(movie => movie.id === id)
+//   }
+//   if (movie) {
+//     res.status(200).json(movie)
+//   } else {
+//     res.status(404).send("Movie ID not found").end()
+//   }
+// });
 
 
 // //if in the DB show them else fetch
@@ -134,6 +154,8 @@ endpoints
 
 
 
-app.listen(port, () => {
-  console.log(`Logos Rocket Backend Listening on port: ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Logos Rocket Backend Listening on port: ${port}`);
+// });
+
+module.exports = app;
