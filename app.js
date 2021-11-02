@@ -2,8 +2,8 @@
 const express = require('express')
 const morgan = require('morgan');
 const app = express();
-const knex = require('knex')(require('./knexfile.js')[process.env.NODE_ENV||'development']);
-const fetch = require('node-fetch');
+const knex = require('knex')(require('./knexfile.js')[process.env.NODE_ENV || 'development']);
+const axios = require('axios');
 const asyncHandler = require('express-async-handler')
 
 const port = process.env.port || 3001;
@@ -12,107 +12,122 @@ app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+/*
+endpoints
+/spacecraft
+/spacecraft/:name
+/pad
+/pad/:name
+*/
 
 
-// async function fetchPokemon(pokemonName) {
-//   let pokeres = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
-//   let pokedata = await pokeres.json();
-//   //console.log(data)
-//   return pokedata;
-// }
 
 
-// app.get('/api/pokemon', asyncHandler(async (req, res) =>{
-//   knex.column('name').select().from('pokedata')
+// //All Pokemon in the DB's name
+// app.get('/api/pokemon', function (req, res) {
+//   knex
+//     .select('Name')
+//     .from('pokemon')
+//     .then(data => res.status(200).json(data))
+//     .catch(err =>
+//       res.status(404).json({
+//         message:
+//           'The data you are looking for could not be found. Please try again'
+//       })
+//     );
+// });
+
+
+
+// //if in the DB show them else fetch
+// app.get('/spacecraft/:name', (req, res) => {
+//   let spacecraft = req.params.name;
+//   //if in database return else fetch it
+//   knex
+//     .select('*')
+//     .from('pokemon')
+//     .where('Name', spacecraft)
 //     .then(data => {
-//       res.status(200).json(data)
-//     })
-// }));
-
-
-// app.get('/api/pokemon/:attribute', asyncHandler(async (req, res) =>{
-//   let attribute = req.params.attribute;
-//   attribute = attribute.toLowerCase();
-//   let result = [];
-//   knex.select('name',`${attribute}`).from('pokedata').orderBy(['name', { column: `${attribute}`, order: 'desc' }])
-//     .then(data => {
-//       res.status(200).json(data)
-//     })
-// }));
-
-
-
-// app.get('/api/:pokemonName', asyncHandler(async (req, res) =>{
-//   let pokemonName =req.params.pokemonName;
-//   pokemonName = pokemonName.toLowerCase();
-//   knex('pokedata')
-//     .where('name', pokemonName)
-//     .then(data => {
-//       if(data.length <= 0){
-//         fetchPokemon(pokemonName)
-//         .then(apidata => {
-//           if(apidata === undefined){
-//             res.status(404).json({
-//               message:
-//                 'No Pokemon by that name'
-//             })
-//           }else{
-//             knex('pokedata').insert([
-//               {name: apidata?.name, type: apidata?.types[0]?.type?.name, dex_number: apidata?.id, hp: apidata?.stats[0].base_stat, attack: apidata?.stats[1].base_stat, defense: apidata?.stats[2].base_stat, special_attack: apidata?.stats[3].base_stat, special_defense:apidata?.stats[4].base_stat, speed:apidata?.stats[5].base_stat,img_link: apidata?.sprites?.other["official-artwork"]?.front_default }
-//             ])
-//             .then(() => {
-//               knex('pokedata')
-//                 .where('name', pokemonName)
-//                 .then(data => {
-//                   res.status(200).json(data)
-//                 })
-//             });
-//           }
-//         });
-//       } else{
+//       if (data.length > 0) {
 //         res.status(200).json(data)
-//       }
-//     })
-// }));
-
-
-
-// app.get('/api/:pokemonName/img', asyncHandler(async (req, res) =>{
-//   let pokemonName =req.params.pokemonName;
-//   pokemonName = pokemonName.toLowerCase();
-//   let apidata;
-//   knex('pokedata')
-//     .where('name', pokemonName)
-//     .then(data => {
-//       if(data.length <= 0){
-//         fetchPokemon(pokemonName)
-//         .then(apidata => {
-//           if(apidata === undefined){
-//             res.status(404).json({
-//               message:
-//                 'No Pokemon by that name'
+//       } else {
+//         axios
+//           .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+//           .then(response => {
+//             let pokemon = response.data;
+//             knex('spacecraft').insert({
+//               Poke_Id: pokemon.id,
+//               Name: pokemon.name,
+//               Type: pokemon.types[0].type.name,
+//               Base_Exp: pokemon.base_experience,
+//               Height: pokemon.height,
+//               Weight: pokemon.weight,
+//               Picture: pokemon.sprites.front_default
+//             }).then(() => {
+//               res.status(200).send({
+//                 Poke_Id: pokemon.id,
+//                 Name: pokemon.name,
+//                 Type: pokemon.types[0].type.name,
+//                 Base_Exp: pokemon.base_experience,
+//                 Height: pokemon.height,
+//                 Weight: pokemon.weight,
+//                 Picture: pokemon.sprites.front_default
+//               });
 //             })
-//           }else{
-//             knex('pokedata').insert([
-//               {name: apidata?.name, type: apidata?.types[0]?.type?.name, dex_number: apidata?.id, hp: apidata?.stats[0].base_stat, attack: apidata?.stats[1].base_stat, defense: apidata?.stats[2].base_stat, special_attack: apidata?.stats[3].base_stat, special_defense:apidata?.stats[4].base_stat, speed:apidata?.stats[5].base_stat,img_link: apidata?.sprites?.other["official-artwork"]?.front_default }
-//             ])
-//             .then(() => {
-//               knex('pokedata')
-//                 .where('name', pokemonName)
-//                 .then(data => {
-//                   res.status(200).json(data[0].img_link)
-//               })
-//             });
-
-//           }
-//         });
-//       } else{
-//         res.status(200).json(data[0].img_link)
+//           })
+//           .catch(err => {
+//             res.status(404).json({
+//               message: `The pokemon you are looking for could not be found. Please try again`
+//             })
+//           })
 //       }
 //     })
-// }));
+// })
 
-
+// //checks for image, if not in DB fetches API and stores
+// app.get('/api/:pokemon/img', (req, res) => {
+//   let pokemon = req.params.pokemon;
+//   //if in database return else fetch it
+//   knex
+//     .select('Picture')
+//     .from('pokemon')
+//     .where('Name', pokemon)
+//     .then(data => {
+//       if (data.length > 0) {
+//         res.status(200).json(data)
+//       } else {
+//         axios
+//           .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+//           .then(response => {
+//             let pokemon = response.data;
+//             knex('pokemon').insert({
+//               Poke_Id: pokemon.id,
+//               Name: pokemon.name,
+//               Type: pokemon.types[0].type.name,
+//               Base_Exp: pokemon.base_experience,
+//               Height: pokemon.height,
+//               Weight: pokemon.weight,
+//               Picture: pokemon.sprites.front_default
+//             }).then(() => {
+//               res.status(200).send({
+//                 Poke_Id: pokemon.id,
+//                 Name: pokemon.name,
+//                 Type: pokemon.types[0].type.name,
+//                 Base_Exp: pokemon.base_experience,
+//                 Height: pokemon.height,
+//                 Weight: pokemon.weight,
+//                 Picture: pokemon.sprites.front_default
+//               });
+//             })
+//           })
+//           .catch(err => {
+//             res.status(404).json({
+//               message: `The pokemon you are looking for could not be found. Please try again`
+//             })
+//           })
+//       }
+//     })
+// })
 
 
 
