@@ -1,7 +1,7 @@
 {
   "name": "LogosBackEnd",
   "version": "1.0.0",
-  "description": "",
+  "description": "[![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js",
@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.24.0",
     "express": "^4.17.1",
     "express-async-handler": "^1.2.0",
     "knex": "^0.95.12",

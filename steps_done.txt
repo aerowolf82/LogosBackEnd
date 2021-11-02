@@ -1,0 +1,34 @@
+cd ~
+docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v $HOME/docker/volumes/postgres:/var/lib/postgresql/data postgres 
+docker ps -a
+docker exec -it pg-docker bash
+psql -U postgres
+postgres=# \l
+                                     List of databases
+       Name        |  Owner   | Encoding |  Collate   |   Ctype    |   Access privileges
+-------------------+----------+----------+------------+------------+-----------------------
+ movie_junkies_dev | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+ postgres          | postgres | UTF8     | en_US.utf8 | en_US.utf8 |
+ template0         | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+                   |          |          |            |            | postgres=CTc/postgres
+ template1         | postgres | UTF8     | en_US.utf8 | en_US.utf8 | =c/postgres          +
+                   |          |          |            |            | postgres=CTc/postgres
+(4 rows)
+
+postgres=#
+# create database sndb;
+# \c sndb
+
+//In another terminal:
+cd ~/CourseContent/SDI7Day38/sndb/LogosBackEnd
+npm init -y
+npm i express pg knex
+npm knex init
+npx knex migrate:make create_sndb
+npm i nodemon
+npm i axios
+
+npx knex migrate:latest  //Failed
+
+// xxx_create_sndb.js, export.up(knex),  inserted (11) columns and types.
+
