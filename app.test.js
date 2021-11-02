@@ -1,19 +1,30 @@
+
 const app = require("./app");
 const request = require("supertest");
-//const { describe } = require("yargs");
-//const { it, expect } = require("@jest/globals");
+const { expect } = require("@jest/globals");
+const { default: knex } = require("knex");
+
+
+// beforeAll(done => {
+//   done()
+// })
+// afterAll(done => {
+//   knex.destroy();
+//   done();
+// });
 
 
 describe("the /spacecraft path", () => {
-  it("GETs data from spacecraft endpoint", async () => {
-    const response = await request(app).get("/spacecraft");
-    const expected = response.body[0].name;
-    expect(expected).toEqual('Mercury No.7');
-  });
+  // it("GETs data from spacecraft endpoint", async () => {
+  //   const response = await request(app).get("/spacecraft");
+  //   const expected = response.body[0].name;
+  //   expect(expected).toEqual('Mercury No.7');
+
+  // });
 
   it(`returns a list of spacecraft from /spacecraft`, (done) => {
     request(app)
-      .get(`/spacecraft`)
+      .get(`/spacecraft/Mercury`)
       .expect(200)
       .expect(`Content-Type`, /json/)
       .expect(
@@ -21,24 +32,17 @@ describe("the /spacecraft path", () => {
       ).end(done)
   });
 });
+
 describe("the /spacecraft/:name path", () => {
   it("returns the data from the searched spacecraft name", async () => {
-    const response = await request(app).get('/spacecraft/mercury');
+    const response = await request(app).get('/spacecraft/Mercury'); //case sensitive
+    console.log('response', response);
     const expected = response.body[0].name;
+    console.log('expected: ', expected);
     expect(expected).toEqual('Mercury No.7');
   });
 
 });
-
-beforeAll(done => {
-  done()
-})
-
-afterAll(done => {
-  // Closing the DB connection allows Jest to exit successfully.
-  mongoose.connection.close()
-  done()
-})
 
 
 // describe('testing the index.js', () => {

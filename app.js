@@ -37,9 +37,58 @@ app.get('/spacecraft', function (req, res) {
     );
 });
 
+
+//if in the DB, show them result, else fetch
 app.get('/spacecraft/:name', (req, res) => {
   let family = req.params.name;
-});
+  //if in database return else fetch it
+  knex('family')
+    .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
+    .select('spacecraft.name', 'family.name as family') //refactor to all
+    // .from('spacecraft')
+    .where('family.name', family)
+    .then(data => res.status(200).json(data))
+    //{
+    // if (data.length > 0) {
+    //   res.status(200).json(data)
+    // } else {
+    //   axios
+    //     .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+    //     .then(response => {
+    //       let pokemon = response.data;
+    //       knex('spacecraft').insert({
+    //         Poke_Id: pokemon.id,
+    //         Name: pokemon.name,
+    //         Type: pokemon.types[0].type.name,
+    //         Base_Exp: pokemon.base_experience,
+    //         Height: pokemon.height,
+    //         Weight: pokemon.weight,
+    //         Picture: pokemon.sprites.front_default
+    //       }).then(() => {
+    //         res.status(200).send({
+    //           Poke_Id: pokemon.id,
+    //           Name: pokemon.name,
+    //           Type: pokemon.types[0].type.name,
+    //           Base_Exp: pokemon.base_experience,
+    //           Height: pokemon.height,
+    //           Weight: pokemon.weight,
+    //           Picture: pokemon.sprites.front_default
+    //         });
+    //       })
+    //     })
+    //     .catch(err => {
+    //       res.status(404).json({
+    //         message: `The pokemon you are looking for could not be found. Please try again`
+    //       })
+    //     })
+    // }
+    .catch(err => {
+      res.status(404).json({
+        message: `The spacecraft you are looking for could not be found. Please try again`
+      })
+    })
+})
+//})
 
 // app.get('/movies/:moviesId', (req, res) => {
 //   let id = parseInt(req.params.moviesId, 10);
@@ -59,50 +108,7 @@ app.get('/spacecraft/:name', (req, res) => {
 // });
 
 
-// //if in the DB show them else fetch
-// app.get('/spacecraft/:name', (req, res) => {
-//   let spacecraft = req.params.name;
-//   //if in database return else fetch it
-//   knex
-//     .select('*')
-//     .from('pokemon')
-//     .where('Name', spacecraft)
-//     .then(data => {
-//       if (data.length > 0) {
-//         res.status(200).json(data)
-//       } else {
-//         axios
-//           .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
-//           .then(response => {
-//             let pokemon = response.data;
-//             knex('spacecraft').insert({
-//               Poke_Id: pokemon.id,
-//               Name: pokemon.name,
-//               Type: pokemon.types[0].type.name,
-//               Base_Exp: pokemon.base_experience,
-//               Height: pokemon.height,
-//               Weight: pokemon.weight,
-//               Picture: pokemon.sprites.front_default
-//             }).then(() => {
-//               res.status(200).send({
-//                 Poke_Id: pokemon.id,
-//                 Name: pokemon.name,
-//                 Type: pokemon.types[0].type.name,
-//                 Base_Exp: pokemon.base_experience,
-//                 Height: pokemon.height,
-//                 Weight: pokemon.weight,
-//                 Picture: pokemon.sprites.front_default
-//               });
-//             })
-//           })
-//           .catch(err => {
-//             res.status(404).json({
-//               message: `The pokemon you are looking for could not be found. Please try again`
-//             })
-//           })
-//       }
-//     })
-// })
+
 
 // //checks for image, if not in DB fetches API and stores
 // app.get('/api/:pokemon/img', (req, res) => {
