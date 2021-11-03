@@ -5,9 +5,6 @@ const app = express();
 const knex = require('knex')(require('./knexfile.js')['development']);
 const axios = require('axios');
 const { SIGTERM } = require('constants');
-// const asyncHandler = require('express-async-handler')
-
-//const port = process.env.port || 3001;
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
@@ -22,33 +19,62 @@ endpoints
 */
 
 
-
-
-//All Spacecraft in the DB
+//All Spacecraft in the DB OR if query, narrow by family
+// NEEDS REFACTOR
 app.get('/spacecraft', function (req, res) {
-  knex
-    .select('name', 'family') //need to refactor to * later in testing (see last test)
-    .from('spacecraft')
-    .then(data => res.status(200).json(data))
-    .catch(err =>
-      res.status(404).json({
-        message:
-          'The data you are looking for could not be found. Please try again'
-      })
-    );
+  if(req.query.family){
+  //QUERY /spacecraft?family=Xxx
+    knex('family')
+      .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
+      .select('spacecraft.name', 'family.name as family') //refactor to all (see last test)
+    // .from('spacecraft')
+      .where('family.name', req.query.family)
+      .then(data => res.status(200).json(data))
+
+  } else {
+    //LIST /spacecraft
+    knex
+      .select('name', 'family_id') //need to refactor to * later in testing (see last test)
+      .from('spacecraft')
+      .then(data => res.status(200).json(data))
+      .catch(err =>
+        res.status(404).json({
+          message:
+            'The data you are looking for could not be found. Please try again'
+        })
+      );
+  }
+
 });
 
-
 //if in the DB, show them result, else fetch
-app.get('/spacecraft/:name', (req, res) => {
-  let family = req.params.name;
+// INDIVIDUAL ROCKET  NEEDS REFACTOR
+app.get('/spacecraft/:id', (req, res) => {
+  let craftId = req.params.id;
   //if in database return else fetch it
-  knex('family')
-    .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
-    .select('spacecraft.name', 'family.name as family') //refactor to all (see last test)
-    // .from('spacecraft')
-    .where('family.name', family)
-    .then(data => res.status(200).json(data))
+  knex
+  .select('*')
+  .from('spacecraft')
+  .where('id', craftId)
+  .then(data => res.status(200).json(data))
+  /* {
+      id: 1,
+      name: 'Mercury No.7',
+      family_id: 1,
+      description: 'Mercury No.7 is the Mercury capsule used for the Mercury-Redstone 3 - callsign \"Freedom 7\" - mission launched on May 5, 1961 and piloted by astronaut Alan Shepard.',
+      image_url: 'https://spacelaunchnow-prod-east.nyc3.digitaloceanspaces.com/media/launcher_images/redstone_image_20190207032627.jpeg',
+      history: 'The Mercury spacecraft was the manned capsule used for suborbital and orbital launches during the Project Mercury, the first human spaceflight program of the United States, from 1958 through 1963.',
+      launch_date: '1961-05-05T14:49:35Z',
+      height: 3.3,
+      diameter: 1.8,
+      pad_id: 2
+    },
+ */
+
+
+
+
+
     //{
     // if (data.length > 0) {
     //   res.status(200).json(data)
@@ -83,6 +109,52 @@ app.get('/spacecraft/:name', (req, res) => {
     //       })
     //     })
     // }
+
+/*  FETCH REFERENCE
+async function fetchPokemon(pokemonName) {
+  let pokeres = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`);
+  let pokedata = await pokeres.json();
+  //console.log(data)
+  return pokedata;
+}
+
+app.get('/api/:pokemonName', asyncHandler(async (req, res) =>{
+  let pokemonName =req.params.pokemonName;
+  pokemonName = pokemonName.toLowerCase();
+  knex('pokedata')
+    .where('name', pokemonName)
+    .then(data => {
+      if(data.length <= 0){
+        fetchPokemon(pokemonName)
+        .then(apidata => {
+          if(apidata === undefined){
+            res.status(404).json({
+              message:
+                'No Pokemon by that name'
+            })
+          }else{
+            knex('pokedata').insert([
+              {name: apidata?.name, type: apidata?.types[0]?.type?.name, dex_number: apidata?.id, hp: apidata?.stats[0].base_stat, attack: apidata?.stats[1].base_stat, defense: apidata?.stats[2].base_stat, special_attack: apidata?.stats[3].base_stat, special_defense:apidata?.stats[4].base_stat, speed:apidata?.stats[5].base_stat,img_link: apidata?.sprites?.other["official-artwork"]?.front_default }
+            ])
+            .then(() => {
+              knex('pokedata')
+                .where('name', pokemonName)
+                .then(data => {
+                  res.status(200).json(data)
+                })
+            });
+          }
+        });
+      } else{
+        res.status(200).json(data)
+      }
+    })
+}));
+
+
+*/
+
+
     .catch(err => {
       res.status(404).json({
         message: `The spacecraft you are looking for could not be found. Please try again`
@@ -109,7 +181,7 @@ app.get('/pads/:id', (req, res) => {
   let pad_id = req.params.id;
   //if in database return else fetch it
   knex('pads')
-    .select('*') //refactored to all, test passes
+    .select('*')
     .where('id', pad_id)
     .then(data => res.status(200).json(data))
     .catch(err => {
@@ -118,8 +190,5 @@ app.get('/pads/:id', (req, res) => {
       })
     })
 })
-
-
-
 
 module.exports = { app, knex };

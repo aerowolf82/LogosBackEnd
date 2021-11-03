@@ -4,49 +4,60 @@ const request = require("supertest");
 const { expect } = require("@jest/globals");
 
 
-// beforeAll(done => {
-//   done()
-// })
-afterAll((done) => {
-  //process.exit(1)
-  //app.close();
+//required for jest to work properly
+afterAll((done) => {  
   knex.destroy();
   done();
 })
 
-// afterAll(async (done) => {
-//   await knex.connection.close()
-//   done()
-// })
 
 describe("the /spacecraft path", () => {
-  // it("GETs data from spacecraft endpoint", async () => {
-  //   const response = await request(app).get("/spacecraft");
-  //   const expected = response.body[0].name;
-  //   expect(expected).toEqual('Mercury No.7');
-
-  // });
-
-  xit(`returns a list of spacecraft from /spacecraft`, (done) => {
+  it(`returns a list of spacecraft from /spacecraft`, (done) => {
     request(app)
-      .get(`/spacecraft/Mercury`)
+      .get(`/spacecraft`)
       .expect(200)
       .expect(`Content-Type`, /json/)
       .expect(
-        [{ name: `Mercury No.7`, family: `Mercury` }]
+        [{ name: `Mercury No.7`, family_id: 1 },
+        { name: 'Soyuz MS-03', family_id: 2 },
+        { name: 'Gemini SC12', family_id: 3 },
+        { name: 'Mercury No.11', family_id: 1 }]
       )
       .end(done)
-    // done();
+  });
+
+  //QUERY ?family=Xxx
+  it(`returns a list of spacecraft from a queried family`, (done) => {
+    request(app)
+      .get(`/spacecraft/?family=Mercury`)
+      .expect(200)
+      .expect(`Content-Type`, /json/)
+      .expect(
+        [{ name: `Mercury No.7`, family: `Mercury` },
+        { name: 'Mercury No.11', family: 'Mercury' }]
+      )
+      .end(done)
   });
 });
 
+//INDIVIDUAL ROCKET
 describe("the /spacecraft/:name path", () => {
-  xit("returns the data from the searched spacecraft name", async () => {
-    const response = await request(app).get('/spacecraft/Mercury'); //case sensitive
-    const expected = response.body[0].name;
-    expect(expected).toEqual('Mercury No.7');
+  it("returns the data from the searched individual spacecraft", async () => {
+    const response = await request(app).get('/spacecraft/1'); //case sensitive
+    const expectedName = response.body[0].name;
+    const expectedFamily_id = response.body[0].family_id;
+    const expectedHeight = response.body[0].height;
+    const expectedDiameter = response.body[0].diameter;
+    const expectedPad_id = response.body[0].pad_id;    
+    console.log(response.body)
+    expect(expectedName).toEqual('Mercury No.7');
+    expect(expectedFamily_id).toEqual(1);
+    expect(expectedHeight).toEqual(3.3);
+    expect(expectedDiameter).toEqual(1.8);
+    expect(expectedPad_id).toEqual(2);
   });
 });
+
 
 describe("the pads path", () => {
   it(`returns a list of pads from /pads`, (done) => {
@@ -79,7 +90,7 @@ describe("the pads path", () => {
 });
 
 describe("the /pads/:name path", () => {
-  xit("returns the data from the searched launch pad name", async () => {
+  it("returns the data from the searched launch pad name", async () => {
     let id = 1;
     const response = await request(app).get(`/pads/${id}`); //case sensitive
     const expected = response.body[0].pad_name;
@@ -89,28 +100,19 @@ describe("the /pads/:name path", () => {
   });
 });
 
-// afterAll(done => {
-//   knex.destroy();
-//   done();
-// });
-
-// describe('testing the index.js', () => {
-//   test('GET /', async () => {
-//     await request(app)
-//       .get('/')
-//       .expect(200, 'Dang \'ol Express app up and runnin\'!');
-//   });
-//   test('GET /books', async () => {
-//     const response = await request(app)
-//       .get('/books')
-//       .expect(200);
-
-//     expect(response.body).toHaveLength(4);
-//   });
-//   it('GETs the expected data from books endpoint', async () => {
-//     const response = await request(app).get('/books');
-
-//     const expected = (response.body[0].id);
-//     expect(expected).toEqual(1);
-//   });
-// });
+describe("Results from earlier Fetching", () => {
+  it("returns the data for Mercury 18 as it was not in original database", async () => {
+    const response = await request(app).get('/spacecraft/5'); //case sensitive
+    const expectedName = response.body[0].name;
+    const expectedFamily_id = response.body[0].family_id;
+    const expectedHeight = response.body[0].height;
+    const expectedDiameter = response.body[0].diameter;
+    const expectedPad_id = response.body[0].pad_id;    
+    console.log(response.body)
+    expect(expectedName).toEqual('Mercury No.18');
+    expect(expectedFamily_id).toEqual(1);
+    expect(expectedHeight).toEqual(3.3);
+    expect(expectedDiameter).toEqual(1.8);
+    expect(expectedPad_id).toEqual(17);
+  });
+});
