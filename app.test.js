@@ -8,10 +8,10 @@ const { default: knex } = require("knex");
 // beforeAll(done => {
 //   done()
 // })
-// afterAll(done => {
-//   knex.destroy();
-//   done();
-// });
+// afterAll(async (done) => {
+//   await knex.destroy()
+//   done()
+// })
 
 
 describe("the /spacecraft path", () => {
@@ -22,7 +22,7 @@ describe("the /spacecraft path", () => {
 
   // });
 
-  it(`returns a list of spacecraft from /spacecraft`, (done) => {
+  xit(`returns a list of spacecraft from /spacecraft`, (done) => {
     request(app)
       .get(`/spacecraft/Mercury`)
       .expect(200)
@@ -34,16 +34,45 @@ describe("the /spacecraft path", () => {
 });
 
 describe("the /spacecraft/:name path", () => {
-  it("returns the data from the searched spacecraft name", async () => {
+  xit("returns the data from the searched spacecraft name", async () => {
     const response = await request(app).get('/spacecraft/Mercury'); //case sensitive
-    console.log('response', response);
     const expected = response.body[0].name;
     console.log('expected: ', expected);
     expect(expected).toEqual('Mercury No.7');
+    // done();
   });
 
 });
 
+describe("the pads path", () => {
+  it(`returns a list of pads from /pads`, (done) => {
+    request(app)
+      .get(`/pads `)
+      .expect(200)
+      .expect(`Content-Type`, /json/)
+      .expect(
+        [{ name: `Space Launch Complex 3W`, location: `Vandenberg SFB, CA, USA` }]
+      ).end(done)
+  });
+
+});
+
+describe("the /pads/:name path", () => {
+  xit("returns the data from the searched launch pad name", async () => {
+    let name = `Space%20Launch%20Complex%203W`;
+    const response = await request(app).get(`/pads/${name}`); //case sensitive
+    console.log('response', response);
+    const expected = response.body[0].name;
+    console.log('expected: ', expected);
+    expect(expected).toEqual('Space Launch Complex 3W');
+    // done();
+  });
+});
+
+// afterAll(done => {
+//   knex.destroy();
+//   done();
+// });
 
 // describe('testing the index.js', () => {
 //   test('GET /', async () => {

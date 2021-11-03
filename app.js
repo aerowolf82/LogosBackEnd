@@ -52,8 +52,8 @@ app.get('/spacecraft/:name', (req, res) => {
     // if (data.length > 0) {
     //   res.status(200).json(data)
     // } else {
-    //   axios
-    //     .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+    //   axios   //try to make a for loop to gather the info from each spacecraft endpoint
+    //     .get(`https://lldev.thespacedevs.com/2.2.0/spacecraft/2/`) // /i/ instead of /2/
     //     .then(response => {
     //       let pokemon = response.data;
     //       knex('spacecraft').insert({
@@ -89,6 +89,39 @@ app.get('/spacecraft/:name', (req, res) => {
     })
 })
 //})
+
+app.get('/pads', function (req, res) {
+  knex
+    .select('name', 'location') //need to refactor to * later in testing
+    .from('pads')
+    .then(data => res.status(200).json(data))
+    .catch(err =>
+      res.status(404).json({
+        message:
+          'The data you are looking for could not be found. Please try again'
+      })
+    );
+  console.log('response', res);
+});
+
+//if in the DB, show them result, else fetch
+app.get('/pads/:name', (req, res) => {
+  let pad = req.params.name;
+  console.log(`pad param: `, pad)
+  //if in database return else fetch it
+  knex('pads')
+    .select('pads.name') //refactor to all
+    // .from('spacecraft')
+    .where('pads.name', pad)
+    .then(data => res.status(200).json(data))
+    .catch(err => {
+      res.status(404).json({
+        message: `The launch pad you are looking for could not be found. Please try again`
+      })
+    })
+})
+
+
 
 // app.get('/movies/:moviesId', (req, res) => {
 //   let id = parseInt(req.params.moviesId, 10);
