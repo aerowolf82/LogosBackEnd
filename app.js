@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const app = express();
 const knex = require('knex')(require('./knexfile.js')['development']);
 const axios = require('axios');
+const { SIGTERM } = require('constants');
 // const asyncHandler = require('express-async-handler')
 
 //const port = process.env.port || 3001;
@@ -26,7 +27,7 @@ endpoints
 //All Spacecraft in the DB
 app.get('/spacecraft', function (req, res) {
   knex
-    .select('name', 'family') //need to refactor to * later in testing
+    .select('name', 'family') //need to refactor to * later in testing (see last test)
     .from('spacecraft')
     .then(data => res.status(200).json(data))
     .catch(err =>
@@ -44,7 +45,7 @@ app.get('/spacecraft/:name', (req, res) => {
   //if in database return else fetch it
   knex('family')
     .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
-    .select('spacecraft.name', 'family.name as family') //refactor to all
+    .select('spacecraft.name', 'family.name as family') //refactor to all (see last test)
     // .from('spacecraft')
     .where('family.name', family)
     .then(data => res.status(200).json(data))
@@ -92,7 +93,7 @@ app.get('/spacecraft/:name', (req, res) => {
 
 app.get('/pads', function (req, res) {
   knex
-    .select('name', 'location') //need to refactor to * later in testing
+    .select('pad_name', 'pad_location') //need to refactor to * later in testing (see last test)
     .from('pads')
     .then(data => res.status(200).json(data))
     .catch(err =>
@@ -101,18 +102,15 @@ app.get('/pads', function (req, res) {
           'The data you are looking for could not be found. Please try again'
       })
     );
-  console.log('response', res);
 });
-
+// front end will need to correlate name and id, currently can't figure out how to search for names because of spaces between words
 //if in the DB, show them result, else fetch
-app.get('/pads/:name', (req, res) => {
-  let pad = req.params.name;
-  console.log(`pad param: `, pad)
+app.get('/pads/:id', (req, res) => {
+  let pad_id = req.params.id;
   //if in database return else fetch it
   knex('pads')
-    .select('pads.name') //refactor to all
-    // .from('spacecraft')
-    .where('pads.name', pad)
+    .select('*') //refactored to all, test passes
+    .where('id', pad_id)
     .then(data => res.status(200).json(data))
     .catch(err => {
       res.status(404).json({
@@ -123,78 +121,5 @@ app.get('/pads/:name', (req, res) => {
 
 
 
-// app.get('/movies/:moviesId', (req, res) => {
-//   let id = parseInt(req.params.moviesId, 10);
-//   console.log(id);
-//   let movie;
-//   if (Number.isNaN(id)) {
-//     res.status(400).send("Invalid ID supplied").end()
-//   }
-//   if (req.params.moviesId) {
-//     movie= movies.find(movie => movie.id === id)
-//   }
-//   if (movie) {
-//     res.status(200).json(movie)
-//   } else {
-//     res.status(404).send("Movie ID not found").end()
-//   }
-// });
 
-
-
-
-// //checks for image, if not in DB fetches API and stores
-// app.get('/api/:pokemon/img', (req, res) => {
-//   let pokemon = req.params.pokemon;
-//   //if in database return else fetch it
-//   knex
-//     .select('Picture')
-//     .from('pokemon')
-//     .where('Name', pokemon)
-//     .then(data => {
-//       if (data.length > 0) {
-//         res.status(200).json(data)
-//       } else {
-//         axios
-//           .get(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
-//           .then(response => {
-//             let pokemon = response.data;
-//             knex('pokemon').insert({
-//               Poke_Id: pokemon.id,
-//               Name: pokemon.name,
-//               Type: pokemon.types[0].type.name,
-//               Base_Exp: pokemon.base_experience,
-//               Height: pokemon.height,
-//               Weight: pokemon.weight,
-//               Picture: pokemon.sprites.front_default
-//             }).then(() => {
-//               res.status(200).send({
-//                 Poke_Id: pokemon.id,
-//                 Name: pokemon.name,
-//                 Type: pokemon.types[0].type.name,
-//                 Base_Exp: pokemon.base_experience,
-//                 Height: pokemon.height,
-//                 Weight: pokemon.weight,
-//                 Picture: pokemon.sprites.front_default
-//               });
-//             })
-//           })
-//           .catch(err => {
-//             res.status(404).json({
-//               message: `The pokemon you are looking for could not be found. Please try again`
-//             })
-//           })
-//       }
-//     })
-// })
-
-
-
-
-
-
-// app.listen(port, () => {
-//   console.log(`Logos Rocket Backend Listening on port: ${port}`);
-// });
-
-module.exports = app;
+module.exports = { app, knex };
