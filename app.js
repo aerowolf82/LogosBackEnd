@@ -5,10 +5,14 @@ const app = express();
 const knex = require('knex')(require('./knexfile.js')['development']);
 const axios = require('axios');
 const { SIGTERM } = require('constants');
+const cors = require('cors')
 
+
+app.use(cors())
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
 
 /*
 endpoints
@@ -26,16 +30,18 @@ app.get('/spacecraft', function (req, res) {
   //QUERY /spacecraft?family=Xxx
     knex('family')
       .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
-      .select('spacecraft.name', 'family.name as family') //refactor to all (see last test)
+      .select('spacecraft.name','spacecraft.id', 'family.name as family') //refactor to all (see last test)
     // .from('spacecraft')
+    // .orderBy(spacecraft.id)
       .where('family.name', req.query.family)
       .then(data => res.status(200).json(data))
 
   } else {
     //LIST /spacecraft
-    knex
-      .select('name', 'family_id') //need to refactor to * later in testing (see last test)
-      .from('spacecraft')
+    knex('family')
+      .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
+      .select('spacecraft.name', 'spacecraft.id', 'family.name as family')
+    // .orderBy(spacecraft.id)
       .then(data => res.status(200).json(data))
       .catch(err =>
         res.status(404).json({
