@@ -20,7 +20,7 @@ app.get('/spacecraft', function (req, res) {
   //QUERY /spacecraft?family=Xxx
     knex('family')
       .join('spacecraft', 'family.id', '=', 'spacecraft.family_id')
-      .select('spacecraft.name','spacecraft.id', 'spacecraft.image_url', 'family.name as family') //refactor to all (see last test)
+      .select('spacecraft.name','spacecraft.id', 'spacecraft.image_url', 'spacecraft.launch_date', 'family.name as family') //refactor to all (see last test)
     // .from('spacecraft')
     // .orderBy(spacecraft.id)
       .where('family.name', req.query.family)
