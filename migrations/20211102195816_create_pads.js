@@ -7,7 +7,7 @@ exports.up = function (knex) {
     table.string('pad_location');
     table.float('latitude');
     table.float('longitude');
-
+    table.string('map_image');
   });
 };
 
